@@ -4,30 +4,26 @@ const cors = require('cors');
 const app = express();
 const port = process.env.PORT || 3000;
 
-// Configurar CORS com TODAS as URLs possíveis da Vercel
+// CORS SUPER PERMISSIVO - RESOLVE 100% DOS PROBLEMAS
 app.use(cors({
-  origin: [
-    'https://projeto-ci-cd-front.vercel.app',
-    'https://projeto-ci-cd-front-git-main-gustavos-projects-0e4368fd.vercel.app',
-    'https://projeto-ci-cd-front-g3nyc19o3-gustavos-projects-0e4368fd.vercel.app',
-    'http://localhost:3000',
-    'http://localhost:5000'
-  ],
-  credentials: true
+  origin: '*', // PERMITE TUDO
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  credentials: false
 }));
 
 app.get('/', (req, res) => {
   res.json({ 
     mensagem: "API online e integrada com CI/CD!",
     versao: "1.0.0",
-    timestamp: new Date().toISOString()
+    timestamp: new Date().toISOString(),
+    status: "CORS configurado para todas as origens"
   });
 });
 
 app.get('/health', (req, res) => {
-  res.status(200).send('OK');
+  res.status(200).json({ status: 'OK' });
 });
 
 app.listen(port, () => {
-  console.log(`Servidor rodando na porta ${port}`);
+  console.log(`🚀 Servidor rodando na porta ${port}`);
 });

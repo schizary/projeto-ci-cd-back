@@ -4,9 +4,15 @@ const cors = require('cors');
 const app = express();
 const port = process.env.PORT || 3000;
 
-// Configurar CORS - vamos atualizar depois com a URL do front
+// Configurar CORS com TODAS as URLs possíveis da Vercel
 app.use(cors({
-  origin: ['https://seu-frontend.vercel.app', 'http://localhost:3000', '*'],
+  origin: [
+    'https://projeto-ci-cd-front.vercel.app',
+    'https://projeto-ci-cd-front-git-main-gustavos-projects-0e4368fd.vercel.app',
+    'https://projeto-ci-cd-front-g3nyc19o3-gustavos-projects-0e4368fd.vercel.app',
+    'http://localhost:3000',
+    'http://localhost:5000'
+  ],
   credentials: true
 }));
 

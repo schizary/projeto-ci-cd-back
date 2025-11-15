@@ -1,5 +1,6 @@
 const express = require('express');
 const cors = require('cors');
+const db = require('./database');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -78,6 +79,90 @@ app.get('/health', (req, res) => {
         timestamp: new Date().toISOString(),
         cors: 'enabled'
     });
+});
+
+// ========== SNAKE GAME API ==========
+
+// Registrar novo usuário
+app.post('/api/register', async (req, res) => {
+    try {
+        const { username, password } = req.body;
+        
+        if (!username || !password) {
+            return res.status(400).json({ error: 'Username e senha são obrigatórios' });
+        }
+        
+        if (username.length < 3) {
+            return res.status(400).json({ error: 'Username deve ter pelo menos 3 caracteres' });
+        }
+        
+        if (password.length < 4) {
+            return res.status(400).json({ error: 'Senha deve ter pelo menos 4 caracteres' });
+        }
+        
+        const user = await db.createUser(username, password);
+        res.json({ success: true, user });
+    } catch (error) {
+        res.status(400).json({ error: error.message });
+    }
+});
+
+// Login
+app.post('/api/login', async (req, res) => {
+    try {
+        const { username, password } = req.body;
+        
+        if (!username || !password) {
+            return res.status(400).json({ error: 'Username e senha são obrigatórios' });
+        }
+        
+        const user = await db.authenticateUser(username, password);
+        res.json({ success: true, user });
+    } catch (error) {
+        res.status(401).json({ error: error.message });
+    }
+});
+
+// Salvar pontuação
+app.post('/api/scores', async (req, res) => {
+    try {
+        const { userId, username, score } = req.body;
+        
+        if (!userId || !username || score === undefined) {
+            return res.status(400).json({ error: 'userId, username e score são obrigatórios' });
+        }
+        
+        if (typeof score !== 'number' || score < 0) {
+            return res.status(400).json({ error: 'Score deve ser um número positivo' });
+        }
+        
+        const scoreEntry = await db.saveScore(userId, username, score);
+        res.json({ success: true, score: scoreEntry });
+    } catch (error) {
+        res.status(400).json({ error: error.message });
+    }
+});
+
+// Obter leaderboard
+app.get('/api/leaderboard', async (req, res) => {
+    try {
+        const limit = parseInt(req.query.limit) || 10;
+        const leaderboard = await db.getLeaderboard(limit);
+        res.json({ success: true, leaderboard });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// Obter melhor pontuação do usuário
+app.get('/api/users/:userId/best-score', async (req, res) => {
+    try {
+        const { userId } = req.params;
+        const bestScore = await db.getUserBestScore(userId);
+        res.json({ success: true, bestScore });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
 });
 
 // Iniciar servidor
